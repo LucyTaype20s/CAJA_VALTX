@@ -96,6 +96,7 @@ for caja in os.scandir(f"{path_main}/CAJA"):
                             shutil.copy(src, dst)
                         except:
                             print("Error al unificar las imgs en el directorio")
+                        print("----")
 
                 indice = 0
 
