@@ -109,15 +109,18 @@ for caja in os.scandir(f"{path_main}/CAJA"):
     else:
         print("NO APTO")
     print("------------------------------------")"""
-"""
+
 lista_nueva=os.listdir(f"{path_main}/CAJA RESULTADO")
 for i in lista_nueva:
     for j in os.listdir(f"{path_main}/CAJA RESULTADO/{i}"):
-        cant_img=glob.glob(f"{path_main}/CAJA RESULTADO/{i}/*/*.tif")
-        print(cant_img)
+
+        """cant_img=glob.glob(f"{path_main}/CAJA RESULTADO/{i}/*/*.tif")
+        #print(cant_img)
         df_homologado=pd.DataFrame(cant_img)
         df_homologado.to_csv(f"{path_main}/CAJA RESULTADO/{i}/ListadoIMGTIF.csv", encoding='utf-8')
-    print(f"LA CAJA {i} : "+str(len(cant_img)))
-    print("----------------------------")"""
+        print(f"LA CAJA {i} : "+str(len(cant_img)))"""
+        if os.path.exists(f"{path_main}/CAJA/{i}/ReporteIndexación.xlsx"):
+            os.remove(f"{path_main}/CAJA/{i}/ReporteIndexación.xlsx")
+    print("----------------------------")
 
 
