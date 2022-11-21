@@ -6,29 +6,28 @@ import datetime
 import shutil
 import numpy as np
 
-now = datetime.datetime.now()
-indice=0
-
 def replace_ (string):
     string=string.replace("\\","/")
     return string
 
-
 path_main="C:/Users/lutay/Downloads/jobs/VALTX"
+now = datetime.datetime.now()
+
+indice=0
 
 list_iCaja=[]
 list_img=[]
 cant_excel=[]
 list_nombre_img=[]
 list_ruta_img=[]
-"""
+
 count=0
 for caja in os.scandir(f"{path_main}/CAJA"):
     cant_excel=glob.glob(f"{path_main}/CAJA/{caja.name}/*.xlsx")
     list_iCaja=os.listdir(f"{path_main}/CAJA/{caja.name}")
     count=Counter(list_iCaja)
-    if (os.path.isdir(f"{path_main}/CAJA RESULTADO/{caja.name}")):
-        shutil.rmtree(f"{path_main}/CAJA RESULTADO/{caja.name}")
+    if (os.path.isdir(f"{path_main}/CAJA/{caja.name}/img")):
+        shutil.rmtree(f"{path_main}/CAJA/{caja.name}/img")
     if ((count["CVL"]==1) | (count["SVL"]==1))&(len(cant_excel)==1):
 
         for i_caja in os.scandir(f"{path_main}/CAJA/{caja.name}"):
@@ -45,17 +44,11 @@ for caja in os.scandir(f"{path_main}/CAJA"):
                 print(len(list_nombre_img))
                 print(len(list_ruta_img))
 
-
-
-
-                os.mkdir(f"{path_main}/CAJA RESULTADO/{caja.name}")
-                os.mkdir(f"{path_main}/CAJA RESULTADO/{caja.name}/img")
-
-                #-------------------------------------------------------------------------
+                # CREACION CARPETA IMG
+                os.mkdir(f"{path_main}/CAJA/{caja.name}/img")
 
                 df_excel = pd.read_excel(f"{path_main}/CAJA/{caja.name}/{i_caja.name}", header=1)
                 df_excel["TIF"].fillna("-", inplace=True)
-                df_excel = df_excel[df_excel["TIF"].str.contains(".tif")]
                 conditions = [
                     (df_excel['IDENTIFICADOR ÚNICO'].isna()) & (df_excel['NÚMERO DE DOCUMENTO'].isna()),
                     (df_excel['IDENTIFICADOR ÚNICO'].isna()),
@@ -63,7 +56,7 @@ for caja in os.scandir(f"{path_main}/CAJA"):
                 ]
                 values = [
                     df_excel['TELÉFONO / CELULAR'].astype(str) + "_" + str(
-                         now.strftime("%d%m%Y") + "_" + str(now.strftime("%H%M%S")) + ".tif"),
+                        now.strftime("%d%m%Y") + "_" + str(now.strftime("%H%M%S")) + ".tif"),
                     df_excel['NÚMERO DE DOCUMENTO'].astype(str) + "_" + str(
                         now.strftime("%d%m%Y") + "_" + str(now.strftime("%H%M%S")) + ".tif"),
                     df_excel['IDENTIFICADOR ÚNICO'].astype(str) + "_" + str(
@@ -75,31 +68,37 @@ for caja in os.scandir(f"{path_main}/CAJA"):
                 df_list_img["EXISTENTE"] = "SI"
 
                 df_homologado = df_excel.merge(df_list_img, how='left', on='TIF')
-                df_homologado = df_homologado[df_homologado["EXISTENTE"] == "SI"]
 
-                lista_lucy=pd.DataFrame(list_nombre_img)
-                lista_lucy.to_csv(f"{path_main}/CAJA RESULTADO/{caja.name}/ListadoTIF.csv", encoding='utf-8')
-                df_homologado.to_csv(f"{path_main}/CAJA RESULTADO/{caja.name}/IndexacionMATH.csv", encoding='utf-8')
-                df_homologado2 = df_homologado[["TIF", "NOMBRE TIF"]]
-                df_homologado2 = df_homologado2.to_numpy().tolist()
+                df_homologado["EXISTENTE"].fillna("NO", inplace=True)
+                df_homologado["FECHA EJECUCION"]=now.strftime("%Y-%m-%d %H:%M:%S")
 
-                df_homologado = df_homologado["TIF"]
-                df_homologado = df_homologado.to_numpy().tolist()
-                print("CANTIDAD DE FILAS ES LA LISTA DE IMAGENES:  ---->  " + str(len(list_nombre_img)))
+                df_homologado.to_excel(f"{path_main}/CAJA/{caja.name}/ReporteIndexación.xlsx",index=False)
+
+                df_existente=df_homologado[df_homologado["EXISTENTE"]=="SI"]
+                df_existente=df_existente[["TIF","NOMBRE TIF"]]
+                df_existenteNombreTif=df_existente["TIF"]
+
+                df_existente=df_existente.to_numpy().tolist()
+                df_existenteNombreTif=df_existenteNombreTif.to_numpy().tolist()
+
+
+
+
 
                 for i in list_nombre_img:
                     indice = indice + 1
-                    if i in df_homologado:
+                    if i in df_existenteNombreTif:
                         path_origen = f"{list_ruta_img[indice - 1]}"
-                        path_destino = f"{path_main}/CAJA RESULTADO/{caja.name}/img"
+                        path_destino = f"{path_main}/CAJA/{caja.name}/img"
                         try:
-                            src = os.path.join(path_origen, i)  # origen
-                            dst = os.path.join(path_destino, df_homologado2[df_homologado.index(i)][1])  # destino
+                            src = os.path.join(path_origen, i)
+                            dst = os.path.join(path_destino, df_existente[df_existenteNombreTif.index(i)][1])
                             shutil.copy(src, dst)
                         except:
                             print("Error al unificar las imgs en el directorio")
 
                 indice = 0
+
                 list_ruta_img.clear()
                 list_nombre_img.clear()
                 list_img.clear()
@@ -108,16 +107,4 @@ for caja in os.scandir(f"{path_main}/CAJA"):
                 print("CARPETA")
     else:
         print("NO APTO")
-    print("------------------------------------")"""
-"""
-lista_nueva=os.listdir(f"{path_main}/CAJA RESULTADO")
-for i in lista_nueva:
-    for j in os.listdir(f"{path_main}/CAJA RESULTADO/{i}"):
-        cant_img=glob.glob(f"{path_main}/CAJA RESULTADO/{i}/*/*.tif")
-        print(cant_img)
-        df_homologado=pd.DataFrame(cant_img)
-        df_homologado.to_csv(f"{path_main}/CAJA RESULTADO/{i}/ListadoIMGTIF.csv", encoding='utf-8')
-    print(f"LA CAJA {i} : "+str(len(cant_img)))
-    print("----------------------------")"""
-
-
+    print("------------------------------------")
